@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { PermissionsBitField } = require('discord.js');
 const { help } = require('./help');
 const { kick } = require('./kick');
 const { ban } = require('./ban');
@@ -58,6 +59,9 @@ const commands = [
 
 const handleCommand = async interaction => {
 
+    const member = interaction.member;
+    const ownerID = interaction.guild.ownerId;
+
     if (interaction.commandName === 'play') {
         await interaction.reply({ content: 'It is in testing mode', ephemeral: true });
     } 
@@ -77,17 +81,29 @@ const handleCommand = async interaction => {
     } 
     
     else if (interaction.commandName === 'kick') {
-        await kick(interaction)
+        if (member.permissions.has(PermissionsBitField.Flags.KickMembers) || member.permissions.has(PermissionsBitField.Flags.Administrator) || member.id === ownerID) {
+            await kick(interaction);
+        } else {
+            await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+        }
     } 
     
     else if (interaction.commandName === 'ban') {
-        await ban(interaction);
-    }
-
+        if (member.permissions.has(PermissionsBitField.Flags.BanMembers) || member.permissions.has(PermissionsBitField.Flags.Administrator) || member.id === ownerID) {
+            await ban(interaction);
+        } else {
+            await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+        }
+    } 
+    
     else if (interaction.commandName === 'timeout') {
-        await timeout(interaction);
+        if (member.permissions.has(PermissionsBitField.Flags.ModerateMembers) || member.permissions.has(PermissionsBitField.Flags.Administrator) || member.id === ownerID) {
+            await timeout(interaction);
+        } else {
+            await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+        }
     }
-}
+};
 
 module.exports = {
     commands,
