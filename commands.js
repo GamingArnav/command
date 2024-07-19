@@ -5,6 +5,7 @@ const { kick } = require('./kick');
 const { ban } = require('./ban');
 const { timeout } = require('./timeout');
 const { profile } = require('./profile');
+const { play } = require('./play');
 
 const commands = [
     new SlashCommandBuilder()
@@ -18,11 +19,13 @@ const commands = [
     new SlashCommandBuilder()
         .setName('profile')
         .setDescription('Shows the information about a user')
-        .addUserOption(option => option.setName('user').setDescription('Enter username to see user info').setRequired(true)),
+        .addUserOption(option => option.setName('user').setDescription('Enter username to see user info').setRequired(false)),
 
     new SlashCommandBuilder()
         .setName('play')
-        .setDescription('Plays a song'),
+        .setDescription('Plays a song')
+        .addStringOption(option => option.setName('song') .setDescription('enter song name') .setRequired(true))
+        .addStringOption(option => option.setName('singer') .setDescription('enter singer name') .setRequired(false)),
 
     new SlashCommandBuilder()
         .setName('kick')
@@ -63,7 +66,7 @@ const handleCommand = async interaction => {
     const ownerID = interaction.guild.ownerId;
 
     if (interaction.commandName === 'play') {
-        await interaction.reply({ content: 'It is in testing mode', ephemeral: true });
+        await play(interaction);
     } 
     
     else if (interaction.commandName === 'help') {
