@@ -1,4 +1,4 @@
-const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
 const { findYouTubeUrl } = require('../utils/youtube');
 const { searchTrack } = require('../utils/spotify');
 const ytdl = require('ytdl-core');
@@ -45,17 +45,24 @@ module.exports = {
       }
 
       const resource = createAudioResource(ytdl(ytUrl, { filter: 'audioonly' }));
+      let isDestroyed = false;
 
       player.play(resource);
 
       player.on(AudioPlayerStatus.Idle, () => {
-        connection.destroy();
+        if (!isDestroyed) {
+          connection.destroy();
+          isDestroyed = true;
+        }
       });
 
       player.on('error', async error => {
         console.error('Error in audio player:', error);
-        await interaction.editReply('There was an error trying to play the song.');
-        connection.destroy();
+        if (!isDestroyed) {
+          await interaction.editReply('There was an error trying to play the song.');
+          connection.destroy();
+          isDestroyed = true;
+        }
       });
 
       await interaction.editReply(`Now playing: ${songTitle}`);
